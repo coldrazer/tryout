@@ -1,108 +1,183 @@
-# Tryout
+<p align="center">
+  <img src="docs/images/banner.jpg" alt="Tryout: networking where agents prove it, not claim it" width="100%">
+</p>
 
-**Networking where agents prove it, not claim it.**
+<p align="center">
+  <b>Post a real problem. Candidates' agents audition on it in locked-down sandboxes.<br>
+  Hidden tests pick the winner. The intro happens only if both people say yes.</b>
+</p>
 
-Someone posts a real problem. Instead of trading résumés, each candidate's agent gets its own locked-down sandbox and *actually attempts the fix*. Hidden tests the agents never see score the work. The top attempt earns its human an intro, and only after **both** people say yes.
+<p align="center">
+  <img alt="Node 22.8+" src="https://img.shields.io/badge/node-22.8%2B-3c873a?logo=node.js&logoColor=white">
+  <img alt="Zero runtime dependencies" src="https://img.shields.io/badge/runtime%20deps-0-b8f34b">
+  <img alt="70 tests passing" src="https://img.shields.io/badge/tests-70%20passing-3ddc97">
+  <img alt="Sandbox: Docker or Linux namespaces" src="https://img.shields.io/badge/sandbox-docker%20%7C%20namespaces-56d4ff">
+  <img alt="License Apache-2.0" src="https://img.shields.io/badge/license-Apache--2.0-blue">
+  <img alt="Anything Applied Agentic Hackathon" src="https://img.shields.io/badge/hackathon-AI--Native%20Professional%20Social-ff6fb5">
+</p>
 
-Built for the *Anything Applied Agentic Hackathon* (theme: AI-Native Professional Social). It covers **Beyond the Resume**, **The Knowledge That Finds You** and **Your Agent, My Agent**.
+<p align="center">
+  <a href="#-see-it-run">Demo</a> ·
+  <a href="#-how-a-tryout-works">How it works</a> ·
+  <a href="#-under-the-hood">Architecture</a> ·
+  <a href="#-built-to-be-un-gameable">Security</a> ·
+  <a href="#-quick-start">Quick start</a> ·
+  <a href="docs/DEMO.md">Stage script</a>
+</p>
 
 ---
 
-## Quick start
+## 💡 The idea
 
-```bash
-# Node 22.8+ required. No npm install needed: zero runtime dependencies.
-docker pull node:22-alpine        # recommended: strongest sandbox (auto-detected)
-cp .env.example .env              # optional: add ANTHROPIC_API_KEY for live agents
-npm start                         # → http://localhost:4400
-```
+Professional networking still runs on **claims**: résumés, bios, "10 years of experience." Anyone can write those. Very few people get to *show* what they can do before the first conversation.
 
-- **No API key?** Tryout runs **rehearsal agents**. These are scripted personas making *real* tool calls in *real* sandboxes, so every test result, block and score is genuine. The UI labels these runs clearly. Use them to rehearse and as a backup if the stage Wi-Fi dies.
-- **With `ANTHROPIC_API_KEY`:** the agents are live Claude tool-use loops (`TRYOUT_MODEL`, default `claude-sonnet-5-5`).
+**Tryout flips that.** Someone posts a real problem, like *"our signup endpoint throws 500s."* Instead of sending profiles, each candidate's **agent auditions**. It gets its own sandbox, reads the code, runs the tests, and ships a fix, live, side by side with the others. Then **hidden tests no agent ever saw** score every attempt in a fresh sandbox. The winner's human earns an introduction, with receipts attached, and contact details are shared **only after both people accept**.
 
-## The 90-second stage demo
+> Receipts, not résumés.
 
-1. **Post a problem.** Pick *Signup Worker throws 500s*, or click **+ Post your own** and paste a source file and a test.
-2. **Pick who's trying out.** Use the three seeded personas, or type a GitHub username to build a candidate profile from what that person has *actually shipped* (non-fork repos, languages, stars).
-3. **Start tryout.** Three lanes stream live: agents read code, run tests, write fixes. When one tries to edit the tests, a red **BLOCKED** line appears in its lane. That's your applause moment.
-4. **Hidden tests decide.** Each attempt is re-scored in a fresh sandbox against tests nobody saw. The quick patch that passed every visible test drops to 60 because hidden tests catch it. That's the "beyond the résumé" point: real skill shows on cases nobody rehearsed.
-5. **Receipts, then consent.** Open the winner's receipts (diff, hidden/visible results, time). Click **Request intro**, accept as the poster, then open the candidate's private link on your phone and accept. The intro email appears with both contacts. Nothing was shared until both people said yes.
+## 🎬 See it run
 
-**Rehearsal personas** (scripted, real sandbox): *Maya* fixes the root cause and scores 100. *Leo* ships a patch that passes the visible tests but fails hidden ones and scores about 60. *Sam* tries to edit the tests, gets blocked and penalized, and scores about 50.
+<p align="center">
+  <img src="docs/images/demo.gif" alt="A full tryout: three agents work in parallel, one gets blocked editing tests, hidden tests score them, and the intro is requested" width="100%">
+</p>
 
-## How it works
+<sub>A real run on the stage UI. Agents work in parallel, the one that tries to edit the tests gets <b>blocked</b>, hidden tests decide the ranking, and the poster requests the intro. Shown in rehearsal mode: scripted agents making real tool calls in real sandboxes.</sub>
 
-```
-Poster ─▶ Problem (source + visible tests + hidden tests)
-            │
-            ├─▶ Sandbox A ◀─ Agent A (tools: list/read/write file, run_tests, submit)
-            ├─▶ Sandbox B ◀─ Agent B          … all in parallel, streamed over SSE
-            └─▶ Sandbox C ◀─ Agent C
-                         │
-                         ▼
-        Fresh scoring sandbox: candidate's source + ORIGINAL visible tests
-                               + hidden tests + random integrity canary
-                         │
-                         ▼
-        Leaderboard (70% hidden, 30% visible, −10 per tamper attempt;
-                     ties → smaller diff, then faster) ─▶ two-sided consent ─▶ intro
-```
+## 🧭 How a tryout works
 
-| File | Role |
+### 1 · Post a real problem
+Choose a seeded problem or paste your own source file and tests. Add candidates by **GitHub username**: their profile is built from repos they actually shipped (forks excluded), not from a bio.
+
+<img src="docs/images/01-setup.png" alt="Setup screen: pick a problem and the candidates trying out" width="100%">
+
+### 2 · Agents audition, live
+Each agent gets its own sandbox and only five tools: list, read, write, run tests, submit. Every step streams to the stage. When an agent tries to "fix" the problem by editing the tests, a red **BLOCKED** appears and the attempt is penalized.
+
+<img src="docs/images/02-arena-live.png" alt="Three agents working in parallel; one is blocked from editing the tests" width="100%">
+
+### 3 · Hidden tests decide
+Every attempt is re-run in a **fresh sandbox** against the original tests plus hidden ones. Leo's quick patch passed every visible test but only **3 of 7** hidden ones. That's the difference between looking right and being right.
+
+<img src="docs/images/03-arena-scored.png" alt="Scored lanes: 100, 60 and 50 with a tamper flag" width="100%">
+
+### 4 · Receipts, not résumés
+The leaderboard ranks by hidden tests (70%) and visible tests (30%), minus tamper penalties. Ties go to the smaller diff, then the faster attempt. Every score links to its receipts: the exact diff, which tests passed, and how long it took.
+
+<img src="docs/images/04-leaderboard.png" alt="Winner banner, leaderboard and intro request" width="100%">
+<img src="docs/images/05-receipts.png" alt="Receipts: score, hidden and visible tests, time, agent summary and the exact diff" width="100%">
+
+### 5 · Two-sided consent
+The poster requests an intro. Each person gets a **private link** that can only answer for them, once. Nobody's email is revealed until **both** accept. Then the intro email is drafted with the receipts inside.
+
+<p align="center"><img src="docs/images/06-consent-mobile.png" alt="Candidate consent on a phone, before and after accepting" width="80%"></p>
+
+<img src="docs/images/07-intro-made.png" alt="Intro made: both accepted, the email is drafted with receipts" width="100%">
+
+## 🎯 Built for this hackathon
+
+**Theme: AI-Native Professional Social.** Tryout answers three of the six challenges with one loop:
+
+| Challenge | How Tryout answers it |
 |---|---|
-| `server.js` | Zero-dependency HTTP server, REST API, SSE stream, security headers |
-| `src/orchestrator.js` | Runs agents in parallel, scores each as it finishes, emits events |
-| `src/agents/claude.js` | Live Claude tool-use loop (retries on 429/5xx/529, turn and time limits) |
-| `src/agents/rehearsal.js` | Scripted personas for rehearsal and offline demos |
-| `src/agents/tools.js` | The *only* capabilities an agent has |
-| `src/sandbox/*` | Docker and local drivers, path safety, signed test harness |
-| `src/scoring.js` | Hidden-test scoring, canary, diffs, ranking |
-| `src/intros.js` | Two-token consent, intro email (mailto / .eml / optional Resend) |
-| `src/profiles.js` | Candidates from GitHub evidence (optional Claude summary) |
-| `problems/*` | Seeded problems: repo, hidden tests, reference and partial fixes |
+| **Beyond the Resume:** can AI understand what you can actually do? | Skill is measured by *doing the work* on a real problem, scored by tests nobody could rehearse for. |
+| **The Knowledge That Finds You:** can the right expertise find you? | The poster doesn't search for people. The problem goes out, and the best fix finds them. |
+| **Your Agent, My Agent:** what happens when agents network on our behalf? | Agents audition for each other's humans. The humans keep the final say through two-sided consent. |
 
-## Security model (audited)
+| Judging criterion | Where to look |
+|---|---|
+| **Working demo** | The full flow runs end to end: post → audition → score → receipts → consent → intro. It works offline in rehearsal mode and live with Claude. |
+| **Technical depth** | Two sandbox drivers, an HMAC-signed test harness, hidden-test scoring in fresh sandboxes, live SSE streaming, and 70 automated tests including escape and cheating attempts. |
+| **Originality** | Networking where the introduction is earned by an agent's *work*, not a profile. |
+| **Usefulness** | Hiring screens, contractor vetting, open-source maintainers looking for help: anywhere "can you actually do this?" comes before "let's talk." |
+| **Human-agent collaboration** *(bonus)* | Humans post the problem, read the receipts, and decide on the intro. Agents do the legwork in between. |
 
-Agents run code that strangers effectively wrote, so the sandbox assumes the code is hostile.
+## 🏗 Under the hood
 
-**Isolation, Docker driver** (used automatically when Docker and `node:22-alpine` are available). Each test run gets a throwaway container with `--network none`, a read-only root filesystem, the workspace mounted **read-only**, a non-root user, all capabilities dropped, `no-new-privileges`, 256 MB RAM, 1 CPU, 64 PIDs, and a hard timeout.
-
-**Isolation, local driver** (Linux). Each run gets new user, network, PID, IPC and UTS namespaces (`unshare -rnpfiu`), `prlimit` caps, and a scrubbed environment. *On macOS the local driver can't isolate the network or other processes, and the UI shows a red badge. Use Docker Desktop.*
-
-**Both drivers** add the Node permission model: reads only inside the workspace, no writes, no child processes, workers, addons, inspector, WASI or `eval`. They also run with `--frozen-intrinsics`.
-
-**Unforgeable results.** Tests run through a trusted harness outside the workspace. It emits **one HMAC-signed result line**, and the key is deleted from the environment before any user code loads. Fake `ok` lines, fake result lines, extra `test()` registrations and patches to `assert`, `node:test`, `EventEmitter` or `Array.prototype` can't change a score. Only test names from a trusted baseline count, and when a name appears twice, any failure wins.
-
-**Tamper-proof scoring.** Scoring uses a fresh sandbox with the *original* tests. Hidden tests and reference fixes are never in the agent's workspace, its API responses or its prompt. A randomized integrity canary is a second line of defense.
-
-**Cross-site protection.** The server usually runs on a laptop with no password, so it refuses state-changing requests from other websites. A write needs `Content-Type: application/json`, which browsers can't send cross-site without a preflight the server never approves. It must not carry a foreign `Origin`. And its `Host` must be localhost, an IP address, or a hostname you trust via `TRYOUT_PUBLIC_URL` or `TRYOUT_ALLOWED_HOSTS`, which blocks DNS rebinding.
-
-**Startup self-test.** On boot, Tryout runs one passing and one failing test through the real sandbox and signed harness. If that fails, for example because Docker is stopped or a cached `node:22-alpine` image is too old, the console and the UI show a red error before anyone is on stage.
-
-**Privacy.** Emails never leave the server until both people accept. Each person gets their own token, which can only answer for their side, once.
-
-### Run the audits
-
-```bash
-npm run audit            # sandbox escape attempts + scoring integrity (both drivers if Docker is up)
-npm test                 # everything: + API e2e, live Claude loop vs a mock API, GitHub profiles
-npm i --no-save puppeteer-core && npm run audit:ui   # headless-Chrome UI flow (set CHROME_PATH if needed)
-npm run verify:problems  # proves each problem is fair: original fails, fix = 100, partial < 100
+```mermaid
+flowchart TB
+    P([Poster posts a real problem<br/>source + visible tests]) --> O{{Orchestrator}}
+    O -. live events over SSE .-> UI[/Stage UI/]
+    subgraph T [Parallel tryouts: no network, 5 tools each]
+      A1[Agent A ⇄ Sandbox A]
+      A2[Agent B ⇄ Sandbox B]
+      A3[Agent C ⇄ Sandbox C]
+    end
+    O --> A1 & A2 & A3
+    A1 & A2 & A3 -->|final source only| S[[Fresh scoring sandbox<br/>original tests + hidden tests + random canary]]
+    H[(Hidden tests)] -. never shown to agents .-> S
+    S -->|HMAC-signed results| L[Leaderboard + receipts]
+    L --> C{Both people accept?}
+    C -->|yes| I([Intro email with receipts])
+    C -->|no| N([Nothing shared])
 ```
 
-The suite has 70 tests. Every attack in `test/sandbox.audit.test.js` and `test/scoring.test.js` is written to pass **only if the attack was blocked**. Every hole found in an audit is fixed and has a regression test:
+| Layer | What it does |
+|---|---|
+| **Agents** (`src/agents/`) | Live **Claude tool-use loop**, with retries on 429/5xx/529 plus turn and time limits. Also **rehearsal personas** that make real tool calls, for offline demos. |
+| **Orchestrator** (`src/orchestrator.js`) | Runs every candidate in parallel, scores each the moment it finishes, and streams events. |
+| **Sandbox** (`src/sandbox/`) | Docker driver, or a Linux namespace driver. Both add the Node permission model and frozen intrinsics. |
+| **Scoring** (`src/scoring.js`) | Fresh sandbox, original plus hidden tests, a randomized integrity canary, diffs, ranking. |
+| **Consent** (`src/intros.js`) | Two private tokens, one answer each, emails hidden until both accept, and the intro as mailto, `.eml`, or optional auto-send. |
+| **Server and UI** (`server.js`, `public/`) | Zero-dependency HTTP server, SSE, strict CSP, and a vanilla-JS stage UI built for projectors and phones. |
 
-- **First audit.** Sandboxed code could signal host processes (fixed with a PID namespace), and it could print fake TAP lines to inflate its score (fixed with the signed harness).
-- **Second audit** (`test/hardening.e2e.test.js`). Cross-site request forgery and DNS rebinding against the local server, a malformed `Last-Event-ID` that dropped the event replay, unbounded run history, duplicate event IDs on long runs, a race that could create two intros, poster emails that went unchecked, and silent failures when saving data or setting up the sandbox.
+## 🔒 Built to be un-gameable
 
-## Hosting (e.g. the Coldrazer VPS, which already runs Docker)
+Tryout runs code that agents wrote on behalf of strangers, so it treats every attempt as hostile, and the leaderboard as something people will try to cheat.
+
+<table>
+<tr><th>Attack</th><th>What happens</th></tr>
+<tr><td>Edit or delete the tests</td><td>Blocked in the sandbox API and penalized. Scoring always uses the <i>original</i> tests.</td></tr>
+<tr><td>Read the hidden tests</td><td>They never enter the agent's workspace, prompt, or API responses.</td></tr>
+<tr><td>Print fake <code>ok</code> lines or fake result lines</td><td>Ignored. Only the harness's <b>HMAC-signed</b> result line counts, and its key is deleted before user code loads.</td></tr>
+<tr><td>Register extra passing <code>test()</code>s</td><td>Ignored. Only test names from a trusted baseline count, and if a name appears twice, any failure wins.</td></tr>
+<tr><td>Monkey-patch <code>assert</code>, <code>node:test</code>, <code>EventEmitter</code>, or <code>Array.prototype</code></td><td>No effect: frozen intrinsics plus locked core modules, with a randomized canary as a second line of defense.</td></tr>
+<tr><td>Phone home, read <code>~/.ssh</code>, or steal API keys</td><td>No network (<code>--network none</code> or a network namespace), filesystem reads limited to the workspace, and a scrubbed environment.</td></tr>
+<tr><td>Fork bomb, infinite loop, memory bomb</td><td>No child processes, CPU, memory, and PID caps, and the whole process group is killed at the time limit.</td></tr>
+<tr><td>Kill the Tryout server from a test</td><td>PID namespace: host processes are invisible.</td></tr>
+<tr><td>Hijack the server from another browser tab (CSRF / DNS rebinding)</td><td>Writes need JSON, a same-origin request, and a trusted Host.</td></tr>
+</table>
+
+Every row is a test that **passes only if the attack is blocked**. Each was run against both sandbox drivers (`test/sandbox.audit.test.js`, `test/scoring.test.js`, `test/hardening.e2e.test.js`). Two audits found and fixed real holes, and each fix has a regression test.
+
+## 🚀 Quick start
+
+```bash
+git clone https://github.com/coldrazer/tryout && cd tryout
+docker pull node:22-alpine     # strongest sandbox, auto-detected (recommended)
+npm start                      # → http://localhost:4400   (no npm install needed)
+```
+
+The terminal should end with **`Self-test: sandbox OK`**.
+
+- **No API key:** agents run in *rehearsal mode*. They're scripted, but every tool call, test result, and score is real. It's ideal for rehearsing and a safe backup if the stage Wi-Fi drops.
+- **Live AI:** `cp .env.example .env`, set `ANTHROPIC_API_KEY`, and restart. Agents become live Claude tool-use loops (`TRYOUT_MODEL`, default `claude-sonnet-5-5`).
+
+<details>
+<summary><b>Configuration</b></summary>
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `ANTHROPIC_API_KEY` | none | Enables live Claude agents |
+| `TRYOUT_MODEL` | `claude-sonnet-5-5` | Model for live agents |
+| `TRYOUT_MODE` | `auto` | `auto`, `live`, or `rehearsal` |
+| `TRYOUT_SANDBOX` | `auto` | `auto` (Docker if ready), `docker`, or `local` |
+| `HOST` / `PORT` | `127.0.0.1` / `4400` | Bind address |
+| `TRYOUT_ADMIN_TOKEN` | none | Require a token for every write. **Set it whenever the server is reachable by others.** |
+| `TRYOUT_PUBLIC_URL` | none | Public base URL for consent links. Also trusted for writes. |
+| `TRYOUT_ALLOWED_HOSTS` | none | Extra trusted hostnames, comma-separated |
+| `RESEND_API_KEY` | none | Send intro emails automatically |
+| `GITHUB_TOKEN` | none | Higher GitHub rate limits when adding candidates |
+
+See [`.env.example`](.env.example) for everything.
+</details>
+
+<details>
+<summary><b>Hosting on a VPS (Nginx + systemd)</b></summary>
 
 ```bash
 docker pull node:22-alpine
-HOST=0.0.0.0 PORT=4400 TRYOUT_ADMIN_TOKEN=<secret> TRYOUT_PUBLIC_URL=https://tryout.yourdomain.com node server.js
+HOST=127.0.0.1 PORT=4400 TRYOUT_ADMIN_TOKEN=<secret> TRYOUT_PUBLIC_URL=https://tryout.yourdomain.com node server.js
 ```
-
-Put it behind Nginx with TLS and **set `TRYOUT_PUBLIC_URL`** to its public address, because writes are only accepted for trusted hostnames. **Set `TRYOUT_ADMIN_TOKEN`** whenever the server is reachable by others, because runs spend API credits. The UI prompts for the token once. Consent links must be reachable from the candidate's phone, so use a public URL rather than a Tailscale-only address if you want people to accept on their own devices. Minimal Nginx location block:
 
 ```nginx
 location / {
@@ -114,9 +189,8 @@ location / {
 }
 ```
 
-Example systemd unit (`/etc/systemd/system/tryout.service`):
-
 ```ini
+# /etc/systemd/system/tryout.service
 [Service]
 WorkingDirectory=/opt/tryout
 EnvironmentFile=/opt/tryout/.env
@@ -124,18 +198,24 @@ ExecStart=/usr/bin/node server.js
 Restart=always
 ```
 
-## Troubleshooting
+Consent links must be reachable from the candidate's phone, so use a public URL if people should accept on their own devices.
+</details>
+
+<details>
+<summary><b>Troubleshooting</b></summary>
 
 | Symptom | Fix |
 |---|---|
-| `SANDBOX SELF-TEST FAILED … bad option: --permission` | Your cached Docker image is older than Node 22.8. Run `docker pull node:22-alpine` and restart. |
-| Self-test fails and Docker isn't running | Start Docker Desktop, or run `TRYOUT_SANDBOX=local npm start` (Linux only for strong isolation). |
-| `403 Host "…" is not allowed` | You're reaching the server by a hostname. Set `TRYOUT_PUBLIC_URL` (or `TRYOUT_ALLOWED_HOSTS=name1,name2`). |
-| `403 Cross-origin request blocked` behind a proxy | Add `proxy_set_header Host $host;` so the Host matches the browser's Origin. |
-| Red "network NOT isolated" badge on macOS | Install and start Docker Desktop. The local driver can't isolate the network on macOS. |
-| Windows | Run inside WSL2 with Docker. Native Windows isn't supported. |
+| `SANDBOX SELF-TEST FAILED … bad option: --permission` | The cached Docker image is older than Node 22.8. Run `docker pull node:22-alpine` and restart. |
+| Self-test fails and Docker isn't running | Start Docker Desktop, or `TRYOUT_SANDBOX=local npm start` (strong isolation on Linux only). |
+| `403 Host "…" is not allowed` | Set `TRYOUT_PUBLIC_URL` or `TRYOUT_ALLOWED_HOSTS`. |
+| `403 Cross-origin request blocked` behind a proxy | Add `proxy_set_header Host $host;`. |
+| Red "network NOT isolated" badge on macOS | Use Docker Desktop. The local driver can't isolate the network on macOS. |
+| Windows | Use WSL2 with Docker. |
+</details>
 
-## Posting your own problem
+<details>
+<summary><b>Posting your own problem (UI or API)</b></summary>
 
 Use **+ Post your own** in the UI, or `POST /api/problems`:
 
@@ -144,25 +224,59 @@ Use **+ Post your own** in the UI, or `POST /api/problems`:
   "source": "...", "visibleTest": "...node:test...", "hiddenTest": "...node:test...", "solution": "optional" }
 ```
 
-Tryout runs the original code in the sandbox to record the baseline test names before accepting the problem.
+Tryout runs the original code in the sandbox to record the trusted baseline of test names before it accepts the problem.
+</details>
 
-## API
+<details>
+<summary><b>REST API</b></summary>
 
 | Method | Path | Notes |
 |---|---|---|
-| GET | `/api/health` | mode, model, sandbox description |
-| GET/POST | `/api/problems` | list / create custom (admin) |
-| GET/DELETE | `/api/problems/:id` | visible files only / delete custom (admin) |
-| GET/POST | `/api/candidates` | list (no emails) / add `{github}` or `{name, email, skills}` (admin) |
-| POST | `/api/runs` | `{problemId, candidateIds[], mode?, poster?}` (admin) |
-| GET | `/api/runs/:id` · `/api/runs/:id/events` | state · SSE stream (replays, resumable) |
-| POST | `/api/runs/:id/cancel` · `/api/runs/:id/intro` | admin |
-| GET/POST | `/api/intros/:id?token=` · `/api/intros/:id/respond` | token-scoped consent |
-| GET | `/api/intros/:id/eml?token=` | intro as .eml (after both accept) |
+| GET | `/api/health` | Mode, model, sandbox, self-test |
+| GET / POST | `/api/problems` | List / create custom *(admin)* |
+| GET / DELETE | `/api/problems/:id` | Visible files only / delete custom *(admin)* |
+| GET / POST | `/api/candidates` | List (no emails) / add `{github}` or `{name, email, skills}` *(admin)* |
+| POST | `/api/runs` | `{problemId, candidateIds[], mode?, poster?}` *(admin)* |
+| GET | `/api/runs/:id` · `/api/runs/:id/events` | State · SSE stream (replayable, resumable) |
+| POST | `/api/runs/:id/cancel` · `/api/runs/:id/intro` | *(admin)* |
+| GET / POST | `/api/intros/:id?token=` · `/api/intros/:id/respond` | Token-scoped consent |
+| GET | `/api/intros/:id/eml?token=` | Intro as `.eml` (after both accept) |
+</details>
 
-## Honest limits
+## 🧪 Tests and audits
 
-- Today every candidate's agent uses the same model. The profile shapes how each agent works, but the score measures the agent's attempt on the person's behalf, not the person directly. The roadmap is agents built from each person's own code history and review style.
-- Problems are JavaScript with `node:test`. Other languages need a harness per runtime.
-- The local driver on macOS is weak (no network or PID isolation). Use Docker there.
-- Native Windows isn't supported. Use WSL2.
+```bash
+npm test                  # all 70 tests: sandbox audits, scoring integrity, API e2e,
+                          # live Claude loop vs a mock Messages API, GitHub profiles,
+                          # hardening regressions, headless-Chrome UI flow*
+npm run audit             # just the sandbox-escape and scoring-integrity audits
+npm run verify:problems   # proves each problem is fair: original fails, fix = 100, partial < 100
+```
+
+<sub>*The UI flow test runs when <code>puppeteer-core</code> and Chrome are available (<code>npm i --no-save puppeteer-core</code>). Otherwise it's skipped.</sub>
+
+## 🧩 Project layout
+
+```
+server.js            HTTP server, REST API, SSE, CSRF guard, security headers
+src/orchestrator.js  parallel runs, scoring hand-off, event stream
+src/agents/          claude.js (live), rehearsal.js (scripted), tools.js (the 5 tools)
+src/sandbox/         docker.js, local.js, harness.js (signed results), common.js
+src/scoring.js       hidden-test scoring, canary, diffs, ranking
+src/intros.js        two-sided consent and intro email
+src/profiles.js      candidates from GitHub evidence
+problems/            seeded problems: repo, hidden tests, reference and partial fixes
+public/              stage UI and mobile consent page
+test/                70 tests across 7 suites
+```
+
+## 🧭 Honest limits and what's next
+
+- **Agents share a model today.** Each profile shapes how its agent works, but the score measures the agent's attempt *on the person's behalf*. Next: agents grounded in each person's own code history and review style.
+- **JavaScript problems only** (`node:test`). Next: harnesses for Python and Go.
+- **The local driver is Linux-first.** Use Docker on macOS. Native Windows isn't supported (use WSL2).
+- **Next up:** private problem rooms for hiring teams, reputation from repeated tryouts, and poster-side rubrics beyond tests.
+
+## 📄 License
+
+[Apache-2.0](LICENSE). The banner background was AI-generated for this project. The seeded candidates (Maya, Leo, Sam) are fictional.

@@ -155,7 +155,7 @@ label { display: grid; gap: 6px; font-size: 13px; color: var(--muted); font-weig
 .testbar-fill.full { background: var(--good); }
 .testbar-fill.part { background: var(--warn); }
 
-.feed { flex: 1; list-style: none; margin: 0; padding: 6px 10px 12px; overflow-y: auto; font-size: 13px; max-height: 360px; border-top: 1px solid var(--border); scroll-behavior: smooth; }
+.feed { flex: 1; list-style: none; margin: 0; padding: 10px 10px 12px; overflow-y: auto; font-size: 13px; max-height: 360px; border-top: 1px solid var(--border); scroll-behavior: smooth; -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 22px); mask-image: linear-gradient(to bottom, transparent 0, #000 22px); }
 .feed li { display: flex; gap: 8px; padding: 5px 4px; animation: enter 0.25s ease-out; border-radius: 6px; }
 .feed li .ic { width: 18px; flex: none; text-align: center; font-family: var(--mono); color: var(--faint); font-size: 12px; padding-top: 1px; }
 .feed li .tx { min-width: 0; overflow-wrap: anywhere; }
@@ -171,7 +171,7 @@ label { display: grid; gap: 6px; font-size: 13px; color: var(--muted); font-weig
 .feed li.submit .tx { color: var(--text); }
 @keyframes enter { from { opacity: 0; transform: translateY(4px); } }
 
-.scorebox { border-top: 1px solid var(--border); padding: 12px 14px; display: flex; align-items: center; gap: 14px; background: var(--surface-2); }
+.scorebox { border-top: 1px solid var(--border); padding: 12px 14px; display: flex; align-items: flex-start; gap: 14px; background: var(--surface-2); }
 .score-num { font-size: 40px; font-weight: 800; letter-spacing: -0.04em; line-height: 1; min-width: 64px; font-variant-numeric: tabular-nums; }
 .score-num small { font-size: 14px; color: var(--muted); font-weight: 600; letter-spacing: 0; }
 .score-detail { flex: 1; font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; }
