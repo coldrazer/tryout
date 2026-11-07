@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tryout — agents prove it</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Tryout home">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-word">tryout</span>
+    </a>
+    <p class="tagline">Networking where agents <em>prove it</em>, not claim it.</p>
+    <div class="badges" id="badges"></div>
+  </header>
+
+  <main>
+    <!-- SETUP -->
+    <section id="setup" class="view">
+      <div class="setup-grid">
+        <div class="panel">
+          <div class="panel-head">
+            <h2><span class="step">1</span> Post a real problem</h2>
+            <button class="btn ghost" id="btn-custom">+ Post your own</button>
+          </div>
+          <div id="problem-list" class="card-list" role="radiogroup" aria-label="Problems"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h2><span class="step">2</span> Who's trying out</h2>
+            <span class="muted small" id="cand-count"></span>
+          </div>
+          <form id="gh-form" class="inline-form">
+            <input id="gh-user" placeholder="Add from GitHub username" autocomplete="off" aria-label="GitHub username">
+            <input id="gh-email" placeholder="email (optional)" type="email" aria-label="Email">
+            <button class="btn" type="submit">Add</button>
+          </form>
+          <div id="gh-msg" class="form-msg" role="status"></div>
+          <div id="candidate-list" class="card-list"></div>
+        </div>
+      </div>
+
+      <div class="launch panel">
+        <div class="launch-fields">
+          <label>Your name <input id="poster-name" placeholder="Problem poster" autocomplete="name"></label>
+          <label>Your email <input id="poster-email" type="email" placeholder="you@company.com" autocomplete="email"></label>
+          <div class="mode" role="radiogroup" aria-label="Agent mode">
+            <span class="mode-label">Agents</span>
+            <label class="seg"><input type="radio" name="mode" value="live"><span>Live AI</span></label>
+            <label class="seg"><input type="radio" name="mode" value="rehearsal"><span>Rehearsal</span></label>
+          </div>
+        </div>
+        <button class="btn primary big" id="btn-start" disabled>Start tryout →</button>
+      </div>
+      <div id="start-msg" class="form-msg center" role="status"></div>
+
+      <details class="panel recent">
+        <summary>Recent tryouts</summary>
+        <div id="recent-list"></div>
+      </details>
+    </section>
+
+    <!-- ARENA -->
+    <section id="arena" class="view hidden">
+      <div class="arena-head">
+        <div>
+          <div class="eyebrow" id="arena-eyebrow">Tryout</div>
+          <h1 id="arena-title"></h1>
+          <p class="muted" id="arena-summary"></p>
+        </div>
+        <div class="arena-meta">
+          <div class="clock" id="arena-clock">0:00</div>
+          <div class="pill" id="arena-status">starting</div>
+          <button class="btn ghost" id="btn-cancel">Stop</button>
+          <button class="btn ghost hidden" id="btn-new">New tryout</button>
+        </div>
+      </div>
+      <div class="rehearsal-banner hidden" id="rehearsal-banner">Rehearsal mode: scripted agents making real tool calls in real sandboxes. Every test result and score is genuine.</div>
+      <div id="lanes" class="lanes"></div>
+
+      <div id="results" class="results hidden">
+        <div class="winner" id="winner"></div>
+        <ol class="leaderboard" id="leaderboard"></ol>
+        <div class="consent panel" id="consent"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Custom problem dialog -->
+  <dialog id="dlg-custom" class="dialog">
+    <form method="dialog" id="custom-form" class="dialog-body">
+      <h2>Post your own problem</h2>
+      <p class="muted small">JavaScript + <code>node:test</code>. Agents see the source and the visible test. Hidden tests are only run at scoring time.</p>
+      <label>Title <input name="title" required maxlength="120" placeholder="Invoice totals are off by a cent"></label>
+      <label>What's wrong (shown to agents) <textarea name="summary" required rows="2" placeholder="Describe the bug and the expected behavior"></textarea></label>
+      <label>Source file path <input name="sourcePath" value="src/index.js"></label>
+      <label>Source code <textarea name="source" required rows="7" class="code" spellcheck="false"></textarea></label>
+      <div class="two">
+        <label>Visible test <textarea name="visibleTest" required rows="7" class="code" spellcheck="false"></textarea></label>
+        <label>Hidden test (optional) <textarea name="hiddenTest" rows="7" class="code" spellcheck="false"></textarea></label>
+      </div>
+      <div id="custom-msg" class="form-msg" role="status"></div>
+      <div class="dialog-actions">
+        <button class="btn ghost" value="cancel" formnovalidate>Cancel</button>
+        <button class="btn primary" id="custom-submit" value="default">Post problem</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Receipts dialog -->
+  <dialog id="dlg-receipts" class="dialog wide">
+    <div class="dialog-body">
+      <div class="panel-head">
+        <h2 id="receipts-title">Receipts</h2>
+        <button class="btn ghost" id="receipts-close">Close</button>
+      </div>
+      <div id="receipts-body"></div>
+    </div>
+  </dialog>
+
+  <script src="/ui.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

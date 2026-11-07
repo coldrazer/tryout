@@ -1,0 +1,38 @@
+{
+  "id": "worker-500",
+  "title": "Signup Worker throws 500s",
+  "summary": "Our edge signup endpoint returns 500 Internal Server Error for some clients. Logs show it dies on certain requests. Make it return correct status codes.",
+  "brief": "src/handler.js is an edge-worker style request handler for POST /api/signup. Some clients get HTTP 500 instead of a proper response. Fix the handler so it never throws: malformed or empty JSON must return 400, wrong content types must return 415, valid signups return 201, and unsupported methods must be handled correctly per HTTP semantics. Keep the public API (module.exports.handle) unchanged.",
+  "tags": [
+    "http",
+    "edge",
+    "error-handling"
+  ],
+  "sourceFiles": [
+    "src/handler.js"
+  ],
+  "visibleTests": [
+    "test/handler.test.js"
+  ],
+  "hiddenTests": [
+    "test-hidden/handler.hidden.test.js"
+  ],
+  "expected": {
+    "visible": 3,
+    "hidden": 7,
+    "visibleNames": [
+      "valid signup returns 201",
+      "empty body returns 400, not 500",
+      "lowercase content-type header is accepted"
+    ],
+    "hiddenNames": [
+      "malformed JSON returns 400 with error body",
+      "content-type with charset parameter is accepted",
+      "text/plain returns 415",
+      "GET returns 405 with Allow: POST",
+      "JSON that is not an object returns 400",
+      "missing headers object does not throw",
+      "invalid email still 422"
+    ]
+  }
+}

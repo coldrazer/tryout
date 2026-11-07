@@ -1,0 +1,36 @@
+{
+  "id": "rate-limiter",
+  "title": "Rate limiter lets bursts through, then locks users out forever",
+  "summary": "Our API rate limiter allows one request too many, and once a user hits the limit they stay blocked even after the window passes. Memory also keeps growing.",
+  "brief": "src/rateLimiter.js implements a sliding-window rate limiter: createLimiter({ limit, windowMs, now }) returns { allow(key), remaining(key) }. A key may make at most `limit` requests within any `windowMs` window. Requests older than windowMs must stop counting (a request made exactly windowMs ago no longer counts) and must be pruned from memory. Keys are independent. Keep the exported API unchanged, including the `_size(key)` debugging helper.",
+  "tags": [
+    "algorithms",
+    "backend",
+    "performance"
+  ],
+  "sourceFiles": [
+    "src/rateLimiter.js"
+  ],
+  "visibleTests": [
+    "test/rateLimiter.test.js"
+  ],
+  "hiddenTests": [
+    "test-hidden/rateLimiter.hidden.test.js"
+  ],
+  "expected": {
+    "visible": 2,
+    "hidden": 6,
+    "visibleNames": [
+      "allows exactly `limit` requests in a window",
+      "allows again after the window passes"
+    ],
+    "hiddenNames": [
+      "keys are independent",
+      "a request exactly windowMs old no longer counts",
+      "window slides (not fixed buckets)",
+      "remaining() reflects the sliding window and never goes negative",
+      "denied requests do not consume quota",
+      "old timestamps are pruned from memory"
+    ]
+  }
+}

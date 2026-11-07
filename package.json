@@ -1,0 +1,22 @@
+{
+  "name": "tryout",
+  "version": "1.0.0",
+  "description": "Tryout \u2014 networking where agents prove skill by doing the work. Post a real problem; candidate agents attempt it in sandboxes; hidden tests score it; both humans consent to the intro.",
+  "main": "server.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=22.8"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test --test-concurrency=1 test/*.test.js",
+    "audit:sandbox": "node --test test/sandbox.audit.test.js",
+    "audit:ui": "node --test test/ui.e2e.test.js",
+    "verify:problems": "node scripts/verify-problems.js",
+    "docker:image": "docker pull node:22-alpine",
+    "demo": "TRYOUT_MODE=rehearsal node server.js",
+    "audit": "node --test --test-concurrency=1 test/sandbox.audit.test.js test/scoring.test.js"
+  },
+  "license": "Apache-2.0"
+}

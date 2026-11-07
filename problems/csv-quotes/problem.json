@@ -1,0 +1,37 @@
+{
+  "id": "csv-quotes",
+  "title": "CSV import mangles customer addresses",
+  "summary": "Our customer import breaks any row with a comma inside quotes (like \"Bakersfield, CA\"). Rows get split into the wrong columns.",
+  "brief": "src/csv.js exports parseCSV(text) which must parse RFC 4180 CSV into an array of rows (arrays of strings). Support quoted fields containing commas, escaped quotes (\"\"), newlines inside quoted fields, LF and CRLF line endings, empty fields, and ignore a single trailing newline at end of input. Keep the exported API unchanged.",
+  "tags": [
+    "parsing",
+    "data",
+    "import"
+  ],
+  "sourceFiles": [
+    "src/csv.js"
+  ],
+  "visibleTests": [
+    "test/csv.test.js"
+  ],
+  "hiddenTests": [
+    "test-hidden/csv.hidden.test.js"
+  ],
+  "expected": {
+    "visible": 2,
+    "hidden": 7,
+    "visibleNames": [
+      "parses simple rows",
+      "quoted field with a comma stays in one column"
+    ],
+    "hiddenNames": [
+      "escaped double quotes",
+      "newline inside a quoted field",
+      "CRLF line endings",
+      "empty fields are preserved",
+      "single trailing newline does not add an empty row",
+      "quoted empty string and quoted field at end of line",
+      "large input parses quickly"
+    ]
+  }
+}
